@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import { InventoryForm } from '@/components/inventory/InventoryForm'
 import { ArrowLeft } from 'lucide-react'
 
@@ -12,17 +13,28 @@ export default function AddInventoryPage() {
   const handleSubmit = async (formData: any) => {
     setLoading(true)
     try {
-      // Call API to save inventory
+      const session = await supabase.auth.getSession()
+      const accessToken = session.data.session?.access_token
+
       const response = await fetch('/api/inventory', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
         body: JSON.stringify(formData),
       })
 
       if (response.ok) {
         router.push('/inventory')
       } else {
-        alert('Failed to save inventory')
+        const data = await response.json()
+        if (response.status === 401) {
+          router.push('/login')
+          return
+        }
+        alert(data?.error || 'Failed to save inventory')
       }
     } catch (error) {
       console.error('Error:', error)

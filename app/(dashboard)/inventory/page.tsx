@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import { InventoryCard } from '@/components/inventory/InventoryCard'
 import { Inventory } from '@/types/database'
 import { Plus, List, Grid3x3, Search } from 'lucide-react'
@@ -19,11 +20,28 @@ export default function InventoryPage() {
 
   const fetchInventory = async () => {
     try {
-      const response = await fetch('/api/inventory')
+      const session = await supabase.auth.getSession()
+      const accessToken = session.data.session?.access_token
+      const response = await fetch('/api/inventory', {
+        credentials: 'include',
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+      })
       const data = await response.json()
+
+      if (!response.ok || !Array.isArray(data)) {
+        console.error('Unexpected inventory response:', data)
+        if (response.status === 401 || data?.error === 'Unauthorized') {
+          router.push('/login')
+          return
+        }
+        setInventory([])
+        return
+      }
+
       setInventory(data)
     } catch (error) {
       console.error('Error fetching inventory:', error)
+      setInventory([])
     } finally {
       setLoading(false)
     }

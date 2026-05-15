@@ -23,6 +23,19 @@ export default function LoginPage() {
       alert(error.message)
     } else {
       setUser(data.user)
+
+      try {
+        const accessToken = data.session?.access_token
+
+        await fetch('/api/onboard', {
+          method: 'POST',
+          credentials: 'include',
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+        })
+      } catch (onboardError) {
+        console.error('Onboarding failed:', onboardError)
+      }
+
       router.push('/dashboard')
     }
     setLoading(false)

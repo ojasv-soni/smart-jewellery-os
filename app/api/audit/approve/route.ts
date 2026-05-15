@@ -1,17 +1,18 @@
-import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import { getServerUserTenant } from '@/lib/supabase-server'
 
 export async function POST(request: Request) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, user, tenantId } = await getServerUserTenant()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!tenantId) return NextResponse.json({ error: 'Tenant record not found' }, { status: 403 })
 
     const body = await request.json()
     const { audit_date, mismatches } = body
 
     // Create audit log
     const auditLogData = mismatches.map((mismatch: any) => ({
-      tenant_id: user.id,
+      tenant_id: tenantId,
       inventory_reference: mismatch.inventory_id,
       mismatch_type: mismatch.severity === 'green' ? 'no_issue' : 'quantity_mismatch',
       severity: mismatch.severity,
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
           .from('inventory')
           .update({ quantity: newQuantity, updated_at: new Date().toISOString() })
           .eq('id', mismatch.inventory_id)
+          .eq('tenant_id', tenantId)
       }
     }
 

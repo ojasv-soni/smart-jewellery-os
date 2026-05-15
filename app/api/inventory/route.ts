@@ -1,14 +1,16 @@
-import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import { getServerUserTenant } from '@/lib/supabase-server'
 
 export async function GET(request: Request) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, user, tenantId } = await getServerUserTenant()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!tenantId) return NextResponse.json({ error: 'Tenant record not found' }, { status: 403 })
 
     const { data, error } = await supabase
       .from('inventory')
       .select('*')
+      .eq('tenant_id', tenantId)
       .eq('deleted_at', null)
       .order('created_at', { ascending: false })
 
@@ -23,8 +25,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, user, tenantId } = await getServerUserTenant()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!tenantId) return NextResponse.json({ error: 'Tenant record not found' }, { status: 403 })
 
     const body = await request.json()
 
@@ -33,7 +36,7 @@ export async function POST(request: Request) {
       .insert([
         {
           ...body,
-          tenant_id: user.id,
+          tenant_id: tenantId,
           created_by: user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),

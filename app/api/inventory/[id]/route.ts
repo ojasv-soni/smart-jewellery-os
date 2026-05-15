@@ -1,10 +1,11 @@
-import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import { getServerUserTenant } from '@/lib/supabase-server'
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, user, tenantId } = await getServerUserTenant()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!tenantId) return NextResponse.json({ error: 'Tenant record not found' }, { status: 403 })
 
     const body = await request.json()
     const { id } = params
@@ -16,6 +17,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
+      .eq('tenant_id', tenantId)
       .select()
 
     if (error) throw error
@@ -29,8 +31,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, user, tenantId } = await getServerUserTenant()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!tenantId) return NextResponse.json({ error: 'Tenant record not found' }, { status: 403 })
 
     const { id } = params
 
@@ -41,6 +44,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         deleted_at: new Date().toISOString(),
       })
       .eq('id', id)
+      .eq('tenant_id', tenantId)
       .select()
 
     if (error) throw error

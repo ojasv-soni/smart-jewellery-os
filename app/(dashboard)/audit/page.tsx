@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import { AuditComparison } from '@/components/audit/AuditComparison'
 import { ArrowLeft } from 'lucide-react'
 
@@ -18,12 +19,30 @@ export default function AuditPage() {
     setLoading(true)
     try {
       // Compare physical count with recorded
+      const session = await supabase.auth.getSession()
+      const accessToken = session.data.session?.access_token
+
       const response = await fetch('/api/audit/compare', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
         body: JSON.stringify(auditData),
       })
       const data = await response.json()
+
+      if (!response.ok) {
+        console.error('Audit compare failed:', data)
+        if (response.status === 401) {
+          router.push('/login')
+          return
+        }
+        alert(data?.error || 'Unable to compare inventory')
+        return
+      }
+
       setMismatches(data.mismatches || [])
       setStep(2)
     } catch (error) {
@@ -37,14 +56,33 @@ export default function AuditPage() {
   const handleApprove = async (approvedMismatches: any[]) => {
     setLoading(true)
     try {
-      await fetch('/api/audit/approve', {
+      const session = await supabase.auth.getSession()
+      const accessToken = session.data.session?.access_token
+
+      const response = await fetch('/api/audit/approve', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
         body: JSON.stringify({
           audit_date: new Date().toISOString(),
           mismatches: approvedMismatches,
         }),
       })
+
+      const data = await response.json()
+      if (!response.ok) {
+        console.error('Audit approve failed:', data)
+        if (response.status === 401) {
+          router.push('/login')
+          return
+        }
+        alert(data?.error || 'Unable to approve audit')
+        return
+      }
+
       alert('✓ Audit completed successfully!')
       router.push('/dashboard')
     } catch (error) {
