@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SMART JEWELLERY INVENTORY OS
 
 > **Luxury AI-assisted Jewellery Inventory Operating System**
@@ -307,3 +308,6 @@ For luxury jewellery businesses, by engineers who understand inventory managemen
 
 [Get Started Now →](./DEPLOYMENT_GUIDE.md)
 
+=======
+# smart-jewellery-os
+>>>>>>> 84b71bcd44a43426277f8961ce8689d9207f03df
