@@ -54,11 +54,11 @@ export default function AddInventoryPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4 md:p-6">
+      <header className="bg-card border-b border-border p-4 md:p-6 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-primary hover:text-primary/80 transition mb-4"
+            className="flex items-center gap-2 text-primary hover:text-primary/80 transition mb-4 -ml-1 px-1 py-1"
           >
             <ArrowLeft size={20} />
             Back
@@ -70,7 +70,7 @@ export default function AddInventoryPage() {
 
       {/* Main Content */}
       <main className="max-w-3xl mx-auto p-4 md:p-6">
-        <div className="bg-card border border-border rounded-lg p-6 md:p-8 shadow-lg">
+        <div className="bg-card border border-border rounded-lg p-4 md:p-8 shadow-lg">
           <InventoryForm onSubmit={handleSubmit} loading={loading} />
         </div>
       </main>

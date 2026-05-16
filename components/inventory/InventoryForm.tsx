@@ -89,23 +89,23 @@ export function InventoryForm({ onSubmit, initialData, loading }: InventoryFormP
       {/* Form Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-foreground font-semibold mb-2">Product Name *</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Product Name *</label>
           <input
             type="text"
             required
             value={formData.product_name}
             onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground placeholder-muted-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground placeholder-muted-foreground text-sm"
             placeholder="e.g., Gold Ring"
           />
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Category *</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Category *</label>
           <select
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
           >
             <option value="">Select Category</option>
             {categories.map((cat) => (
@@ -117,85 +117,85 @@ export function InventoryForm({ onSubmit, initialData, loading }: InventoryFormP
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Gross Weight (g) *</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Gross Weight (g) *</label>
           <input
             type="number"
             step="0.1"
             required
             value={formData.gross_weight}
             onChange={(e) => setFormData({ ...formData, gross_weight: parseFloat(e.target.value) })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
             placeholder="0.00"
           />
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Quantity *</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Quantity *</label>
           <input
             type="number"
             required
             value={formData.quantity}
             onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
             placeholder="1"
           />
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Purchase Price (₹) *</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Purchase Price (₹) *</label>
           <input
             type="number"
             step="0.01"
             required
             value={formData.purchase_price}
             onChange={(e) => setFormData({ ...formData, purchase_price: parseFloat(e.target.value) })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
             placeholder="0.00"
           />
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Selling Price (₹)</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Selling Price (₹)</label>
           <input
             type="number"
             step="0.01"
             value={formData.selling_price}
             onChange={(e) => setFormData({ ...formData, selling_price: parseFloat(e.target.value) })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
             placeholder="0.00"
           />
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Vendor *</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Vendor *</label>
           <input
             type="text"
             required
             value={formData.vendor}
             onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
             placeholder="Vendor name"
           />
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Storage Location *</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Storage Location *</label>
           <input
             type="text"
             required
             value={formData.storage_location}
             onChange={(e) => setFormData({ ...formData, storage_location: e.target.value })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
             placeholder="e.g., Shelf A1"
           />
         </div>
 
         <div>
-          <label className="block text-foreground font-semibold mb-2">Status</label>
+          <label className="block text-foreground font-semibold mb-2 text-sm">Status</label>
           <select
             value={formData.status}
             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground"
+            className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground text-sm"
           >
             {statuses.map((status) => (
               <option key={status} value={status}>
@@ -207,11 +207,11 @@ export function InventoryForm({ onSubmit, initialData, loading }: InventoryFormP
       </div>
 
       <div>
-        <label className="block text-foreground font-semibold mb-2">Notes</label>
+        <label className="block text-foreground font-semibold mb-2 text-sm">Notes</label>
         <textarea
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground placeholder-muted-foreground"
+          className="w-full bg-input border border-border rounded-lg px-3 md:px-4 py-2.5 text-foreground placeholder-muted-foreground text-sm"
           placeholder="Additional notes..."
           rows={3}
         />
@@ -222,7 +222,7 @@ export function InventoryForm({ onSubmit, initialData, loading }: InventoryFormP
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary/90 transition font-bold disabled:opacity-50"
+          className="flex-1 bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary/90 transition font-bold disabled:opacity-50 text-base"
         >
           {loading ? 'Saving...' : 'Save Inventory'}
         </button>

@@ -71,20 +71,20 @@ export function InventoryCard({ item, onEdit, onDelete }: InventoryCardProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <button
             onClick={() => onEdit(item)}
-            className="flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center gap-2 text-sm"
+            className="flex-1 bg-primary text-primary-foreground py-2.5 sm:py-2 px-3 rounded-lg hover:bg-primary/90 transition flex items-center justify-center gap-2 text-sm font-medium"
           >
             <Edit size={16} />
-            Edit
+            <span>Edit</span>
           </button>
           <button
             onClick={() => onDelete(item.id)}
-            className="flex-1 bg-destructive/20 text-destructive py-2 px-3 rounded-lg hover:bg-destructive/30 transition flex items-center justify-center gap-2 text-sm"
+            className="flex-1 bg-destructive/20 text-destructive py-2.5 sm:py-2 px-3 rounded-lg hover:bg-destructive/30 transition flex items-center justify-center gap-2 text-sm font-medium"
           >
             <Trash2 size={16} />
-            Delete
+            <span>Delete</span>
           </button>
         </div>
       </div>

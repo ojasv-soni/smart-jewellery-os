@@ -15,12 +15,16 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+
     try {
       const supabase = getPublicSupabase()
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } },
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+          data: { full_name: name },
+        },
       })
 
       if (error) {
@@ -29,24 +33,17 @@ export default function SignupPage() {
         return
       }
 
-      // Trigger server-side onboarding to create tenant and user mapping
-      try {
-        const accessToken = data.session?.access_token
-        await fetch('/api/onboard', {
-          method: 'POST',
-          credentials: 'include',
-          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-        })
-      } catch (onboardError) {
-        console.error('Onboarding failed:', onboardError)
+      const emailConfirmed = Boolean(data.session?.user?.email_confirmed_at)
+      if (emailConfirmed) {
+        router.push('/onboarding')
+      } else {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`)
       }
-
-      // After signup, send user to onboarding welcome page
-      router.push('/onboarding')
     } catch (err) {
       console.error(err)
       alert('Signup failed')
     }
+
     setLoading(false)
   }
 

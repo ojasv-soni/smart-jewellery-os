@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const setUser = useAuthStore((state) => state.setUser)
   const router = useRouter()
 
@@ -22,7 +23,14 @@ export default function LoginPage() {
       password,
     })
     if (error) {
-      alert(error.message)
+      const lowerMessage = error.message.toLowerCase()
+      if (lowerMessage.includes('confirm') || lowerMessage.includes('verification') || lowerMessage.includes('verify')) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+        setLoading(false)
+        return
+      }
+
+      setErrorMessage(error.message)
     } else {
       setUser(data.user)
 
@@ -70,6 +78,12 @@ export default function LoginPage() {
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
+
+        {errorMessage ? (
+          <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {errorMessage}
+          </div>
+        ) : null}
 
         <div className="mt-6 text-center">
           <p className="text-muted-foreground text-sm">

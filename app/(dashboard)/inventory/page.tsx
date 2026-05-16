@@ -70,27 +70,27 @@ export default function InventoryPage() {
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="px-4 py-4 md:px-6 md:py-6">
-          <div className="flex justify-between items-start gap-3 mb-4 md:items-center">
-            <div className="min-w-0">
+          <div className="flex justify-between items-start gap-3 mb-4 md:items-center flex-col sm:flex-row">
+            <div className="min-w-0 w-full sm:w-auto">
               <h1 className="text-2xl md:text-3xl font-bold text-foreground truncate">Inventory</h1>
               <p className="text-sm md:text-base text-muted-foreground mt-1">{filteredInventory.length} items</p>
             </div>
             <button
               onClick={() => router.push('/inventory/add')}
-              className="flex items-center gap-2 bg-primary text-primary-foreground px-3 md:px-4 py-2 rounded-lg hover:bg-primary/90 transition flex-shrink-0 text-sm md:text-base"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary text-primary-foreground px-3 md:px-4 py-2 rounded-lg hover:bg-primary/90 transition text-sm md:text-base"
             >
               <Plus size={18} />
-              <span className="hidden sm:inline">Add</span>
+              <span>Add Item</span>
             </button>
           </div>
 
           {/* Search Bar & View Mode */}
-          <div className="flex gap-2 md:gap-3 flex-wrap">
-            <div className="flex-1 min-w-[200px] relative">
+          <div className="flex gap-2 md:gap-3 flex-col sm:flex-row">
+            <div className="flex-1 min-w-0 relative">
               <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search items..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-input border border-border rounded-lg pl-10 pr-4 py-2 text-sm md:text-base text-foreground"
@@ -134,7 +134,7 @@ export default function InventoryPage() {
               <div className="text-foreground">Loading inventory...</div>
             </div>
           ) : filteredInventory.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 px-4">
               <p className="text-muted-foreground mb-4">No inventory items yet</p>
               <button
                 onClick={() => router.push('/inventory/add')}

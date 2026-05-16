@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { BarChart3, Package, CheckCircle, Settings, Menu } from 'lucide-react'
 import { useState } from 'react'
+import { useRequireAuth } from '@/lib/auth-guard'
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const { isLoading } = useRequireAuth()
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -20,13 +22,19 @@ export default function DashboardLayout({
     { href: '/settings', label: 'Settings', icon: Settings },
   ]
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="text-lg font-semibold text-foreground">Restoring your session...</div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+      {/* Desktop Sidebar */}
       <aside
-        className={`${
-          sidebarOpen ? 'w-64' : 'w-20'
-        } bg-card border-r border-border transition-all duration-300 flex flex-col`}
+        className={`hidden lg:flex ${sidebarOpen ? 'w-64' : 'w-20'} bg-card border-r border-border transition-all duration-300 flex-col`}
       >
         {/* Logo */}
         <div className="p-4 border-b border-border">
@@ -71,8 +79,47 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      <div className="flex-1 flex flex-col">
+        {/* Mobile Header */}
+        <header className="lg:hidden bg-card border-b border-border">
+          <div className="flex items-center justify-between px-4 py-4">
+            <div>
+              <h1 className="text-lg font-bold text-foreground">SMART JEWELLERY INVENTORY OS</h1>
+              <p className="text-sm text-muted-foreground">Tap a section to navigate</p>
+            </div>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg bg-muted/10 text-foreground hover:bg-muted/20 transition"
+              aria-label="Toggle menu"
+            >
+              <Menu size={20} />
+            </button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto px-4 pb-4">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition whitespace-nowrap ${
+                    isActive
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-card text-foreground hover:border-primary hover:text-primary'
+                  }`}
+                >
+                  <Icon size={16} />
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">{children}</main>
+      </div>
     </div>
   )
 }

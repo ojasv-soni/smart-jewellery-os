@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Package, Users, BarChart3 } from 'lucide-react'
+import { useRequireAuth } from '@/lib/auth-guard'
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const { isLoading } = useRequireAuth()
   const [step, setStep] = useState(1)
 
   const steps = [
@@ -109,6 +111,14 @@ export default function OnboardingPage() {
 
   const currentStep = steps[step - 1]
   const Icon = currentStep.icon
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="text-lg text-foreground">Checking your sign-in status...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">

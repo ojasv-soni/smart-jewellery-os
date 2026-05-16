@@ -4,26 +4,14 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import getPublicSupabase from '@/lib/supabase'
 import { useAuthStore } from '@/store'
+import { useRequireAuth } from '@/lib/auth-guard'
 import { Package, Plus, Settings, LogOut } from 'lucide-react'
 
 export default function DashboardPage() {
   const router = useRouter()
   const { user, logout } = useAuthStore()
+  const { isLoading: authLoading } = useRequireAuth()
   const [stats, setStats] = useState({ total: 0, lowStock: 0, weight: 0 })
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = getPublicSupabase()
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      if (!authUser) {
-        router.push('/login')
-      } else {
-        setLoading(false)
-      }
-    }
-    checkAuth()
-  }, [router])
 
   const handleLogout = async () => {
     const supabase = getPublicSupabase()
@@ -32,10 +20,10 @@ export default function DashboardPage() {
     router.push('/login')
   }
 
-  if (loading) {
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-xl text-foreground">Loading dashboard...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="text-lg font-semibold text-foreground">Preparing your dashboard...</div>
       </div>
     )
   }
