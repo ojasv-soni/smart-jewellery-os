@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import getPublicSupabase from '@/lib/supabase'
 import { AuditComparison } from '@/components/audit/AuditComparison'
 import { ArrowLeft } from 'lucide-react'
 
@@ -19,6 +19,7 @@ export default function AuditPage() {
     setLoading(true)
     try {
       // Compare physical count with recorded
+      const supabase = getPublicSupabase()
       const session = await supabase.auth.getSession()
       const accessToken = session.data.session?.access_token
 
@@ -56,6 +57,7 @@ export default function AuditPage() {
   const handleApprove = async (approvedMismatches: any[]) => {
     setLoading(true)
     try {
+      const supabase = getPublicSupabase()
       const session = await supabase.auth.getSession()
       const accessToken = session.data.session?.access_token
 

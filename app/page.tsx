@@ -2,13 +2,14 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import getPublicSupabase from '@/lib/supabase'
 
 export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
     const checkUser = async () => {
+      const supabase = getPublicSupabase()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {

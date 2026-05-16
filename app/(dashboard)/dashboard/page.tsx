@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import getPublicSupabase from '@/lib/supabase'
 import { useAuthStore } from '@/store'
 import { Package, Plus, Settings, LogOut } from 'lucide-react'
 
@@ -14,6 +14,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const supabase = getPublicSupabase()
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (!authUser) {
         router.push('/login')
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   }, [router])
 
   const handleLogout = async () => {
+    const supabase = getPublicSupabase()
     await supabase.auth.signOut()
     logout()
     router.push('/login')
