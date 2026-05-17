@@ -17,38 +17,77 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    const supabase = getPublicSupabase()
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) {
-      const lowerMessage = error.message.toLowerCase()
-      if (lowerMessage.includes('confirm') || lowerMessage.includes('verification') || lowerMessage.includes('verify')) {
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+    setErrorMessage('')
+    
+    try {
+      const supabase = getPublicSupabase()
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        const lowerMessage = error.message.toLowerCase()
+        if (lowerMessage.includes('confirm') || lowerMessage.includes('verification') || lowerMessage.includes('verify')) {
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`)
+          setLoading(false)
+          return
+        }
+
+        setErrorMessage(error.message)
         setLoading(false)
         return
       }
 
-      setErrorMessage(error.message)
-    } else {
       setUser(data.user)
 
+      // Call onboarding endpoint to check/provision user
       try {
         const accessToken = data.session?.access_token
 
-        await fetch('/api/onboard', {
+        const onboardResponse = await fetch('/api/onboard', {
           method: 'POST',
           credentials: 'include',
           headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
         })
-      } catch (onboardError) {
-        console.error('Onboarding failed:', onboardError)
-      }
 
-      router.push('/dashboard')
+        if (!onboardResponse.ok) {
+          const onboardError = await onboardResponse.json()
+          console.error('[LOGIN] Onboarding error:', onboardError)
+          setErrorMessage(`Onboarding failed: ${onboardError.error || 'Unknown error'}`)
+          setLoading(false)
+          return
+        }
+
+        const onboardData = await onboardResponse.json()
+        console.log('[LOGIN] Onboarding result:', onboardData)
+
+        // Route based on onboarding completion status
+        if (onboardData.onboarded) {
+          if (onboardData.onboarding_completed === false) {
+            // New user - show onboarding flow
+            console.log('[LOGIN] Routing to onboarding (first-time user)')
+            router.push('/onboarding')
+          } else {
+            // Returning user - go to dashboard
+            console.log('[LOGIN] Routing to dashboard (returning user)')
+            router.push('/dashboard')
+          }
+        } else {
+          console.warn('[LOGIN] Onboarding returned but not marked as onboarded')
+          router.push('/dashboard')
+        }
+      } catch (fetchError) {
+        console.error('[LOGIN] Onboarding request failed:', fetchError)
+        setErrorMessage(`Session error: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`)
+        setLoading(false)
+        return
+      }
+    } catch (err) {
+      console.error('[LOGIN] Unexpected error:', err)
+      setErrorMessage(`Login failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
@@ -80,7 +119,7 @@ export default function LoginPage() {
         </button>
 
         {errorMessage ? (
-          <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <div className="mt-4 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {errorMessage}
           </div>
         ) : null}

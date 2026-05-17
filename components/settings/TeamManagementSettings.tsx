@@ -20,6 +20,7 @@ export function TeamManagementSettings() {
   const [loading, setLoading] = useState(false)
   const [invites, setInvites] = useState<Invite[]>([])
   const [loadingInvites, setLoadingInvites] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [copiedToken, setCopiedToken] = useState<string | null>(null)
   const { addToast } = useToast()
 
@@ -30,21 +31,26 @@ export function TeamManagementSettings() {
 
   const loadPendingInvites = async () => {
     setLoadingInvites(true)
+    setLoadError(null)
     try {
       const response = await fetch('/api/invite/list', {
         credentials: 'include',
       })
 
       if (!response.ok) {
-        console.error('Failed to fetch invites')
+        const errorData = await response.json()
+        console.error('[TEAM_SETTINGS] Failed to fetch invites:', errorData)
+        setLoadError(errorData.error || 'Failed to load invites')
         setLoadingInvites(false)
         return
       }
 
       const data = await response.json()
+      console.log('[TEAM_SETTINGS] Loaded invites:', data.invites?.length ?? 0)
       setInvites(data.invites || [])
     } catch (error) {
-      console.error('Error loading invites:', error)
+      console.error('[TEAM_SETTINGS] Error loading invites:', error)
+      setLoadError(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoadingInvites(false)
     }
@@ -55,6 +61,8 @@ export function TeamManagementSettings() {
     if (!email || !role) return
 
     setLoading(true)
+    console.log(`[TEAM_SETTINGS] Creating invite for ${email} with role ${role}`)
+    
     try {
       const response = await fetch('/api/invite', {
         method: 'POST',
@@ -63,15 +71,17 @@ export function TeamManagementSettings() {
         body: JSON.stringify({ email, role }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const data = await response.json()
+        console.error('[TEAM_SETTINGS] Invite creation failed:', data)
         addToast(data?.error || 'Failed to create invite', 'error')
         setLoading(false)
         return
       }
 
-      const data = await response.json()
       if (data.ok && data.invite) {
+        console.log('[TEAM_SETTINGS] Invite created successfully')
         addToast(`✓ Invite created for ${email}`, 'success')
         setEmail('')
         setRole('employee')
@@ -79,7 +89,8 @@ export function TeamManagementSettings() {
         await loadPendingInvites()
       }
     } catch (error) {
-      addToast('Failed to create invite', 'error')
+      console.error('[TEAM_SETTINGS] Unexpected error:', error)
+      addToast(`Error: ${error instanceof Error ? error.message : 'Failed to create invite'}`, 'error')
     } finally {
       setLoading(false)
     }
@@ -93,6 +104,7 @@ export function TeamManagementSettings() {
     const link = getInviteLink(token)
     navigator.clipboard.writeText(link)
     setCopiedToken(token)
+    console.log('[TEAM_SETTINGS] Copied invite link to clipboard')
     addToast('Invite link copied to clipboard!', 'success')
     setTimeout(() => setCopiedToken(null), 2000)
   }
@@ -145,6 +157,9 @@ export function TeamManagementSettings() {
           >
             {loading ? 'Creating invite...' : 'Create Invite'}
           </button>
+          <p className="text-xs text-muted-foreground">
+            💡 Once created, copy the invite link and share it with your team member. They can open it in any browser to accept.
+          </p>
         </form>
       </div>
 
@@ -152,6 +167,16 @@ export function TeamManagementSettings() {
       {loadingInvites ? (
         <div className="bg-card border border-border rounded-lg p-4 md:p-6 text-center">
           <p className="text-muted-foreground text-sm">Loading invites...</p>
+        </div>
+      ) : loadError ? (
+        <div className="bg-card border border-destructive/20 rounded-lg p-4 md:p-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="text-destructive flex-shrink-0 mt-0.5" size={18} />
+            <div>
+              <p className="font-semibold text-destructive text-sm">Failed to load invites</p>
+              <p className="text-xs text-destructive/80 mt-1">{loadError}</p>
+            </div>
+          </div>
         </div>
       ) : invites.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-4 md:p-6 text-center">
@@ -205,15 +230,6 @@ export function TeamManagementSettings() {
           </div>
         </div>
       )}
-
-      {/* Help Info */}
-      <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
-        <p className="text-xs md:text-sm text-blue-100">
-          <strong>How it works:</strong> Create an invite, copy the link, and share it via WhatsApp or email. Your team member will sign up
-          with that email, then click the link to join your workspace with the role you assigned.
-        </p>
-      </div>
     </div>
   )
 }
-

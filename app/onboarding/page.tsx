@@ -9,6 +9,32 @@ export default function OnboardingPage() {
   const router = useRouter()
   const { isLoading } = useRequireAuth()
   const [step, setStep] = useState(1)
+  const [isCompleting, setIsCompleting] = useState(false)
+
+  const handleCompleteOnboarding = async () => {
+    setIsCompleting(true)
+    try {
+      const response = await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('[ONBOARDING] Completion failed:', error)
+        alert(`Failed to complete onboarding: ${error.error}`)
+        setIsCompleting(false)
+        return
+      }
+
+      console.log('[ONBOARDING] Successfully marked as complete')
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('[ONBOARDING] Unexpected error:', error)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      setIsCompleting(false)
+    }
+  }
 
   const steps = [
     {
@@ -98,12 +124,6 @@ export default function OnboardingPage() {
             <p className="text-foreground font-semibold">Your workspace is ready</p>
           </div>
           <p className="text-muted-foreground">You can always come back to settings to adjust preferences or invite more team members.</p>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="w-full bg-primary text-primary-foreground py-3 rounded-lg hover:bg-primary/90 transition font-semibold"
-          >
-            Go to Dashboard
-          </button>
         </div>
       ),
     },
@@ -177,7 +197,8 @@ export default function OnboardingPage() {
           {step > 1 && (
             <button
               onClick={() => setStep(step - 1)}
-              className="flex-1 border border-border text-foreground py-3 rounded-lg hover:bg-muted/50 transition font-semibold"
+              disabled={isCompleting}
+              className="flex-1 border border-border text-foreground py-3 rounded-lg hover:bg-muted/50 transition font-semibold disabled:opacity-50"
             >
               Back
             </button>
@@ -185,17 +206,19 @@ export default function OnboardingPage() {
           {step < steps.length && (
             <button
               onClick={() => setStep(step + 1)}
-              className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg hover:bg-primary/90 transition font-semibold flex items-center justify-center gap-2"
+              disabled={isCompleting}
+              className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg hover:bg-primary/90 transition font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
             >
               Next <ArrowRight size={18} />
             </button>
           )}
           {step === steps.length && (
             <button
-              onClick={() => router.push('/dashboard')}
-              className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg hover:bg-primary/90 transition font-semibold flex items-center justify-center gap-2"
+              onClick={handleCompleteOnboarding}
+              disabled={isCompleting}
+              className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg hover:bg-primary/90 transition font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Go to Dashboard <ArrowRight size={18} />
+              {isCompleting ? 'Completing...' : 'Go to Dashboard'} <ArrowRight size={18} />
             </button>
           )}
         </div>
