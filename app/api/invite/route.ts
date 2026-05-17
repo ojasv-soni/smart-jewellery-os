@@ -21,6 +21,35 @@ export async function POST(req: Request) {
     const email = body?.email
     if (!email) return NextResponse.json({ error: 'Email required' }, { status: 400 })
 
+    // Check for duplicate active invite
+    const { data: existingInvite } = await supabase
+      .from('invites')
+      .select('id, expires_at, accepted')
+      .eq('tenant_id', userRecord.tenant_id)
+      .eq('email', email)
+      .eq('accepted', false)
+      .maybeSingle()
+
+    if (existingInvite) {
+      // Check if expired
+      if (new Date(existingInvite.expires_at) > new Date()) {
+        return NextResponse.json(
+          { error: 'An active invite already exists for this email. Ask them to check their invite link.' },
+          { status: 409 }
+        )
+      } else {
+        // Expired invite; we can create a new one
+        const { error: deleteError } = await supabase
+          .from('invites')
+          .delete()
+          .eq('id', existingInvite.id)
+
+        if (deleteError) {
+          console.error('Failed to clean up expired invite', deleteError)
+        }
+      }
+    }
+
     const token = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 

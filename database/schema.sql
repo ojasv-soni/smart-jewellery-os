@@ -94,6 +94,22 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
 );
 
+-- Invites Table
+CREATE TABLE IF NOT EXISTS invites (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  token TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL,
+  tenant_id UUID NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('owner', 'admin', 'employee', 'viewer')),
+  accepted BOOLEAN DEFAULT FALSE,
+  accepted_at TIMESTAMP WITH TIME ZONE,
+  created_by UUID NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Create Indexes for Performance
 CREATE INDEX idx_inventory_tenant ON inventory(tenant_id);
 CREATE INDEX idx_inventory_category ON inventory(category);
@@ -103,6 +119,10 @@ CREATE INDEX idx_audit_logs_tenant ON audit_logs(tenant_id);
 CREATE INDEX idx_audit_logs_severity ON audit_logs(severity);
 CREATE INDEX idx_activity_logs_tenant ON activity_logs(tenant_id);
 CREATE INDEX idx_activity_logs_user ON activity_logs(user_id);
+CREATE INDEX idx_invites_tenant ON invites(tenant_id);
+CREATE INDEX idx_invites_email ON invites(email);
+CREATE INDEX idx_invites_token ON invites(token);
+CREATE INDEX idx_invites_accepted ON invites(accepted);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;

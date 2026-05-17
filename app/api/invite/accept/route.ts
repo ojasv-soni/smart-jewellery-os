@@ -98,7 +98,7 @@ export async function POST(req: Request) {
     // Mark invite as accepted
     const { error: acceptError } = await supabase
       .from('invites')
-      .update({ accepted_at: new Date().toISOString() })
+      .update({ accepted: true, accepted_at: new Date().toISOString() })
       .eq('token', token)
 
     if (acceptError) {
